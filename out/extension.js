@@ -44,13 +44,13 @@ function activate(context) {
         if (ext !== 'css' && ext !== 'less')
             return;
         const text = doc.getText();
-        const rootRegex = /:root(?:[.\w-]*)?\s*{([^}]+)}/g;
+        const rootRegex = /[\w\d\s-\[\]\=]*:root(?:[.\w-]*)?\s*{([^}]+)}/g; ///:root(?:[.\w-]*)?\s*{([^}]+)}/g;
         const variableRegex = /--([\w-]+)\s*:\s*([^;]+);/g;
         const variableMap = new Map();
         const flatVariableMap = new Map();
         let match;
         while ((match = rootRegex.exec(text)) !== null) {
-            const selectorMatch = match[0].match(/:root(?:[.\w-]*)?/);
+            const selectorMatch = match[0].match(/[\w\d\s-\[\]\=]*:root(?:[.\w-]*)?/);
             const selector = selectorMatch ? selectorMatch[0] : ':root';
             const body = match[1];
             let varMatch;
@@ -89,7 +89,7 @@ function activate(context) {
                 || /^[a-z]+$/i.test(val);
         };
         const selectors = Array.from(new Set(Array.from(variableMap.values()).flatMap(map => Array.from(map.keys()))));
-        const header = `<tr><th>Variable</th>${selectors.map(s => `<th>${s}</th>`).join('')}</tr>`;
+        const header = `<tr><th>Variable</th>${selectors.map(s => `<th>${s.trimStart().trimEnd()}</th>`).join('')}</tr>`;
         const rows = Array.from(variableMap.entries()).map(([varName, contextMap]) => {
             const cells = selectors.map(selector => {
                 const rawVal = contextMap.get(selector) ?? '';
